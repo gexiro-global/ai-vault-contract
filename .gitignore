@@ -1,0 +1,11 @@
+# Editor / OS state
+.obsidian/plugins/*/data.json
+.obsidian/workspace*.json
+.obsidian/cache
+.DS_Store
+*.bak
+
+# never commit secrets or env
+.env
+*.key
+*.pem
