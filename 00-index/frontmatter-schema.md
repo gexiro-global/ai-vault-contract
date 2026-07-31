@@ -17,7 +17,7 @@ Canonical YAML for every note. Property **types are enforced vault-wide** by Obs
 
 | field | type | required | notes |
 |---|---|---|---|
-| `title` | Text | yes | `== H1 ==` kebab filename stem; keyword-rich claim/handle; unique vault-wide (case-insensitive) |
+| `title` | Text | yes | kebab-case filename stem (the note also carries exactly one H1); keyword-rich claim/handle; unique vault-wide (case-insensitive) |
 | `aliases` | List | when synonyms exist | acronyms / synonyms / spelled-out forms; unique vault-wide — qualify generic acronyms (`cache-write-through`, not `cache`) |
 | `type` | Text (enum) | yes | one value, see enum below |
 | `status` | Text (enum) | yes | one value, see enum below |

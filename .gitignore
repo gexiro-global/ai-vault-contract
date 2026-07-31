@@ -9,3 +9,7 @@
 .env
 *.key
 *.pem
+
+# Python bytecode from tools/
+__pycache__/
+*.pyc

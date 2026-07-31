@@ -40,7 +40,8 @@ cd my-vault
 
 ## What this is NOT
 
-- It is not a plugin, a script, or a piece of software. It is a **convention plus a starting structure**. There is nothing to install and nothing to run.
+- It is not an application or a plugin. It is a **convention plus a starting structure**; the notes and the contract are the product. The one executable here is
+  `tools/lint_vault.py`, a dependency-free structural linter you can run or ignore.
 - It does not lint your vault for you out of the box. The contract specifies the checks (schema, size, orphans, dedup, secret scan); wiring them to a specific tool or a pre-commit hook is left to you, because the right tool depends on your setup. The included CI does a minimal structural check as a starting point.
 - It is not tied to a specific model or agent. Claude and Codex are the reference pair; the rules are model-agnostic.
 - It is not a Zettelkasten purity project. It borrows atomicity and linking from that tradition and drops the ceremony.
