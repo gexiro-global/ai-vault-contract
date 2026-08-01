@@ -140,6 +140,26 @@ def test_secret_shaped_string_is_caught():
         assert rc == 1 and "secret-shaped" in out, out
 
 
+def test_scalar_aliases_is_rejected_not_iterated():
+    """A bare scalar was iterated character by character, so every letter became an alias."""
+    with tempfile.TemporaryDirectory() as d:
+        body = GOOD.format(stem="scalar-alias", aliases="x").replace(
+            "aliases: [x]", "aliases: justastring"
+        )
+        rc, out = run(vault(d, **{"scalar-alias.md": body}))
+        assert rc == 1 and "aliases must be a list" in out, out
+
+
+def test_h1_inside_a_code_fence_is_not_counted():
+    """A comment inside a fenced block is not a heading."""
+    fence = chr(96) * 3
+    with tempfile.TemporaryDirectory() as d:
+        body = GOOD.format(stem="fenced", aliases="fnc")
+        body += "\n" + fence + "bash\n# not a heading\necho hi\n" + fence + "\n"
+        rc, out = run(vault(d, **{"fenced.md": body}))
+        assert rc == 0, out
+
+
 def test_repo_docs_outside_vault_folders_are_ignored():
     with tempfile.TemporaryDirectory() as d:
         root = pathlib.Path(d)

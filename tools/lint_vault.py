@@ -147,7 +147,10 @@ def main(argv=None) -> int:
         if fm.get("title") and fm["title"] != stem:
             errors.append(f"{rel}: title '{fm['title']}' != filename stem '{stem}'")
 
-        headings = H1_RE.findall(text)
+        # Strip fenced code before counting headings: a `# example` inside a shell snippet is
+        # not a heading, and flagging it trains people to ignore the linter.
+        body = re.sub(r"^```.*?^```", "", text, flags=re.MULTILINE | re.DOTALL)
+        headings = H1_RE.findall(body)
         if len(headings) != 1:
             errors.append(f"{rel}: expected exactly one H1 heading, found {len(headings)}")
 
@@ -160,7 +163,13 @@ def main(argv=None) -> int:
             except ValueError:
                 errors.append(f"{rel}: {field} '{val}' is not a real ISO date")
 
-        names = [str(fm.get("title", stem))] + [str(a) for a in (fm.get("aliases") or [])]
+        aliases = fm.get("aliases")
+        if aliases is not None and not isinstance(aliases, list):
+            # A bare scalar would otherwise be iterated character by character, so every letter
+            # became an "alias" and real collisions were never detected.
+            errors.append(f"{rel}: aliases must be a list, e.g. [first, second]")
+            aliases = []
+        names = [str(fm.get("title", stem))] + [str(a) for a in (aliases or [])]
         for name in names:
             key = name.lower()
             other = seen_names.get(key)
