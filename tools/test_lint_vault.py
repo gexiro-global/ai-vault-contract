@@ -37,10 +37,33 @@ def run(root):
     return proc.returncode, proc.stdout
 
 
-def vault(tmp, **notes):
-    """Build a throwaway vault: {filename: content} under 40-research/."""
+DEFAULT_REGISTRY = (
+    "---\n"
+    "title: tag-registry\n"
+    "type: reference\n"
+    "status: active\n"
+    "tags: [type/reference]\n"
+    "created: 2026-01-01\n"
+    "updated: 2026-01-01\n"
+    "---\n"
+    "\n# tag-registry\n\n"
+    "- `type/research` - an atomic knowledge note\n"
+    "- `type/reference` - a stable reference\n"
+    "- `domain/infra` - infrastructure\n"
+)
+
+
+def vault(tmp, registry=DEFAULT_REGISTRY, **notes):
+    """Build a throwaway vault: {filename: content} under 40-research/.
+
+    A registry is written by default because its absence is itself a lint problem - see
+    test_missing_registry_is_reported.
+    """
     root = pathlib.Path(tmp)
     (root / "40-research").mkdir(parents=True, exist_ok=True)
+    if registry is not None:
+        (root / "00-index").mkdir(parents=True, exist_ok=True)
+        (root / "00-index" / "tag-registry.md").write_text(registry, encoding="utf-8")
     for name, content in notes.items():
         (root / "40-research" / name).write_text(content, encoding="utf-8")
     return root
@@ -85,17 +108,25 @@ def test_impossible_date_is_caught():
 
 def test_unregistered_tag_is_caught():
     with tempfile.TemporaryDirectory() as d:
-        root = pathlib.Path(d)
-        (root / "00-index").mkdir(parents=True)
-        (root / "00-index" / "tag-registry.md").write_text(
-            "# Tag Registry\n\n- `type/research` - a note\n", encoding="utf-8"
-        )
         body = GOOD.format(stem="tagged", aliases="tg").replace(
             "tags: [type/research]", "tags: [type/research, domain/invented]"
         )
-        vault(d, **{"tagged.md": body})
-        rc, out = run(root)
+        rc, out = run(vault(d, **{"tagged.md": body}))
         assert rc == 1 and "not in the registry" in out, out
+
+
+def test_missing_registry_is_reported_not_ignored():
+    """Deleting the registry disables membership checking, so it must be loud.
+
+    Previously a missing registry made every tag acceptable and the vault still linted clean -
+    the closed-vocabulary guarantee could disappear without a single failing check.
+    """
+    with tempfile.TemporaryDirectory() as d:
+        body = GOOD.format(stem="any-note", aliases="an").replace(
+            "tags: [type/research]", "tags: [type/research, domain/invented]"
+        )
+        rc, out = run(vault(d, registry=None, **{"any-note.md": body}))
+        assert rc == 1 and "tag membership is NOT enforced" in out, out
 
 
 def test_missing_type_tag_is_caught():

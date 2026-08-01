@@ -71,18 +71,24 @@ def parse_frontmatter(text: str) -> tuple[dict, str]:
     return out, block
 
 
-def load_registry(root: pathlib.Path) -> set:
+def load_registry(root: pathlib.Path) -> tuple:
     """Read the allowed tags out of 00-index/tag-registry.md.
 
-    The registry is the closed vocabulary the contract refers to; an empty result means the
-    registry is missing, and tag membership is then not enforced rather than silently failing
-    every note.
+    Returns (tags, problem). A missing or unreadable registry disables membership checking, so
+    it is reported as a problem rather than passing quietly - a vault whose closed vocabulary
+    silently stopped being enforced looks exactly like a clean one.
     """
     path = root / "00-index" / "tag-registry.md"
     if not path.is_file():
-        return set()
-    text = path.read_text(encoding="utf-8")
-    return set(re.findall(r"`((?:type|status|domain|project|flow)/[a-z0-9-]+)`", text))
+        return set(), f"tag registry not found at {path.relative_to(root)} - tag membership is NOT enforced"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        return set(), f"tag registry unreadable ({exc}) - tag membership is NOT enforced"
+    tags = set(re.findall(r"`((?:type|status|domain|project|flow)/[a-z0-9-]+)`", text))
+    if not tags:
+        return set(), "tag registry contains no recognisable tags - tag membership is NOT enforced"
+    return tags, None
 
 
 def is_note(path: pathlib.Path, root: pathlib.Path) -> bool:
@@ -102,7 +108,7 @@ def iter_markdown(root: pathlib.Path):
 def main(argv=None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     root = pathlib.Path(argv[0]) if argv else pathlib.Path(".")
-    registry = load_registry(root)
+    registry, registry_problem = load_registry(root)
     errors: list[str] = []
     # One shared namespace: an alias must not collide with another note's title either.
     seen_names: dict[str, pathlib.Path] = {}
@@ -181,6 +187,11 @@ def main(argv=None) -> int:
             errors.append(f"{rel}: literal '{{{{date}}}}' left in frontmatter")
         if SECRET_RE.search(text) or HEX_RE.search(text):
             errors.append(f"{rel}: a secret-shaped string was found - do not commit secrets")
+
+    # A vault with no notes needs no registry; one with notes but no registry has silently
+    # stopped enforcing its closed vocabulary, which must not look like a clean run.
+    if registry_problem and note_count:
+        errors.insert(0, registry_problem)
 
     print(f"linted {note_count} note(s), {len(errors)} problem(s)")
     for err in errors:
