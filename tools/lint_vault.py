@@ -155,7 +155,7 @@ def main(argv=None) -> int:
 
         # Strip fenced code before counting headings: a `# example` inside a shell snippet is
         # not a heading, and flagging it trains people to ignore the linter.
-        body = re.sub(r"^```.*?^```", "", text, flags=re.MULTILINE | re.DOTALL)
+        body = re.sub(r"^(```|~~~).*?^\1", "", text, flags=re.MULTILINE | re.DOTALL)
         headings = H1_RE.findall(body)
         if len(headings) != 1:
             errors.append(f"{rel}: expected exactly one H1 heading, found {len(headings)}")
