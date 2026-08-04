@@ -9,9 +9,13 @@ useDefault = true
 
 [allowlist]
 description = "Fixtures that must contain secret-shaped strings"
+# Compiled bytecode is build output and never committed, but a local `gitleaks dir` run would
+# otherwise rediscover the fixture string inside it.
 paths = [
-  '''tools/test_lint_vault\.py''',
-  # Compiled bytecode is build output, never committed, but a local `gitleaks dir` run would
-  # otherwise rediscover the fixture string inside it.
   '''__pycache__/''',
+]
+# Only the one fixture string is exempt - not the whole test file. Allowlisting the file would
+# mean a real secret committed there later would also be ignored.
+regexes = [
+  '''abcdef0123456789abcdef0123456789''',
 ]
