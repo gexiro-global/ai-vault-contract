@@ -1,0 +1,17 @@
+# gitleaks configuration
+#
+# The default ruleset, plus one allowlist entry: the linter's own test suite contains a
+# deliberately fake secret, because a secret-detection check that is never fed a secret is a
+# check nobody has verified. Removing it would weaken the test to keep the scanner quiet.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Fixtures that must contain secret-shaped strings"
+paths = [
+  '''tools/test_lint_vault\.py''',
+  # Compiled bytecode is build output, never committed, but a local `gitleaks dir` run would
+  # otherwise rediscover the fixture string inside it.
+  '''__pycache__/''',
+]
