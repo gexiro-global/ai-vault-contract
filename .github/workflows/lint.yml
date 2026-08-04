@@ -16,3 +16,16 @@ jobs:
         run: python tools/lint_vault.py .
       - name: Test the linter
         run: python tools/test_lint_vault.py
+
+  secret-scan:
+    # The vault linter only inspects notes. A secret committed to a template, a workflow or the
+    # README would never be looked at - so scan the whole repository, history included.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

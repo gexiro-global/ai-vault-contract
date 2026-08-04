@@ -191,6 +191,16 @@ def test_h1_inside_a_code_fence_is_not_counted():
         assert rc == 0, out
 
 
+def test_h1_inside_a_tilde_fence_is_not_counted():
+    """Tilde fences are valid Markdown and were not being stripped."""
+    fence = "~" * 3
+    with tempfile.TemporaryDirectory() as d:
+        body = GOOD.format(stem="tilde", aliases="tld")
+        body += "\n" + fence + "bash\n# not a heading\necho hi\n" + fence + "\n"
+        rc, out = run(vault(d, **{"tilde.md": body}))
+        assert rc == 0, out
+
+
 def test_repo_docs_outside_vault_folders_are_ignored():
     with tempfile.TemporaryDirectory() as d:
         root = pathlib.Path(d)
