@@ -1,7 +1,7 @@
 # ai-vault-contract
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Lint](https://github.com/gexiro-global/ai-vault-contract/actions/workflows/lint.yml/badge.svg)](https://github.com/gexiro-global/ai-vault-contract/actions/workflows/lint.yml)
+[![CI](https://github.com/gexiro-global/ai-vault-contract/actions/workflows/lint.yml/badge.svg)](https://github.com/gexiro-global/ai-vault-contract/actions/workflows/lint.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A starter [Obsidian](https://obsidian.md) vault and write-contract for a knowledge base that **coding agents maintain alongside you** — built for Claude and Codex, usable by any agent that can read Markdown and run a shell.
 
@@ -62,6 +62,10 @@ _templates/               note and ADR templates
 
 ## License
 
+MIT is used here so vault templates and conventions can be adopted with minimal downstream obligations.
+
 [MIT](LICENSE) — use it, adapt it, ship your own vault from it.
 
-Built and maintained by Gexiro Global Enterprises Ltd.
+Built and maintained by [Gexiro Global Enterprises Ltd](https://gexiro.com).
+
+Part of the [Gexiro open-source toolkit](https://github.com/gexiro-global).
